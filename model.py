@@ -112,7 +112,7 @@ def test_model(model, test_loader):
         acc = 100.0 * n_correct / n_samples
         print(f'Accuracy of the network on the 10000 test images: {acc} %')
 
-@task(f'Convert to ONNX')
+@task(name=f'Convert to ONNX')
 def convert_to_onnx(model, onnx_file_path):
     dummy_input = torch.randn(1, input_size).to(device)
     torch.onnx.export(model, dummy_input, onnx_file_path, export_params=True, opset_version=10, do_constant_folding=True)
