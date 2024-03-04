@@ -111,4 +111,12 @@ def test_model(model, test_loader):
         acc = 100.0 * n_correct / n_samples
         print(f'Accuracy of the network on the 10000 test images: {acc} %')
 
+@action(f'Execution', log_prints=True)
+def execution():
+    x_train, y_train, x_test, y_test = prepare_datasets()
+    train_loader, test_loader = create_data_loaders(x_train, y_train, x_test, y_test)
+    model = train_model(train_loader)
+    test_model(model, test_loader)
+
+execution()
 
