@@ -33,4 +33,24 @@ class Net(nn.Module):
         out = self.l2(out)
         return out
 
-        
+def resize_images(images):
+    return np.array([zoom(images[0], (0.5, 0.5)) for image in images])
+
+@task(name=f'Prepare Datasets')
+def prepare_datasets():
+    print("Prepare datasets...")
+    train_dataset = torchvision.datasets.MNIST(root='./data', train=True, download=True)
+    test_dataset = torchvision.datasets.MNIST(root='./data', train=False)
+
+    x_train = resize_images(train_dataset)
+    y_train = resize_images(test_dataset)
+
+    x_train = torch.tensor(x_train.reshape(-1, 14*14).astype('float32') / 255)
+    y_train = torch.tensor([label for _, label in train_dataset], dtype=torch.long) 
+
+    x_test = torch.tensor(x_test.reshape(-1, 14*14).astype('float32') / 255)
+    y_test = torch.tensor([label for _, label in test_dataset], dtype=torch.long)
+
+    print("✅ Datasets prepared successfully")
+
+    return x_train, y_train, x_test, y_test
