@@ -132,6 +132,23 @@ def preprocess_image(image_path):
     image = image.reshape(1, 196)  # Reshape to (1, 196) for model input
     return image
 
+def prediction(image):
+    model = GizaModel(model_path="./mnist_model.onnx")
+
+    result = model.predict(
+        input_feed={"onnx::Gemm_0": image}, verifiable=False
+    )
+
+    # Convert result to a PyTorch tensor
+    result_tensor = torch.tensor(result)
+    # Apply softmax to convert to probabilities
+    probabilities = F.softmax(result_tensor, dim=1)
+    # Use argmax to get the predicted class
+    predicted_class = torch.argmax(probabilities, dim=1)
+
+    return predicted_class.item()
+
+
 @action(name=f'Execution', log_prints=True)
 def execution():
     x_train, y_train, x_test, y_test = prepare_datasets()
