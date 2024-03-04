@@ -54,3 +54,14 @@ def prepare_datasets():
     print("✅ Datasets prepared successfully")
 
     return x_train, y_train, x_test, y_test
+
+@task(name=f'Create Loaders')
+def create_data_loaders(x_train, y_train, x_test, y_test ):
+    print("Create loaders...")
+
+    train_loader = DataLoader(TensorDataset(x_train, y_train), batch_size=batch_size, shuffle=True)
+    test_loader = DataLoader(TensorDataset(x_test, y_test), batch_size=batch_size, shuffle=False)
+
+    print("✅ Loaders created!")
+
+    return train_loader, test_loader
