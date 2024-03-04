@@ -126,6 +126,10 @@ def execution():
     model = train_model(train_loader)
     test_model(model, test_loader)
 
+    # Convert to ONNX
+    onnx_file_path = "mnist_model.onnx"
+    convert_to_onnx(model, onnx_file_path)
+
 if __name__=="__main__":
     action_deploy = Action(entrypoint=execution, name="pytorch-mnist-action")
     action_deploy.serve(name="pytorch-mnist-deployment")
