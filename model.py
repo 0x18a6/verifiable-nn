@@ -92,6 +92,7 @@ def train_model(train_loader):
     print("✅ Model trained successfully")
     return model
 
+@task(name=f'Test model')
 def test_model(model, test_loader):
     print("Test model...")
     with torch.no_grad():
