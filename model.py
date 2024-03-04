@@ -43,7 +43,7 @@ def prepare_datasets():
     test_dataset = torchvision.datasets.MNIST(root='./data', train=False)
 
     x_train = resize_images(train_dataset)
-    y_train = resize_images(test_dataset)
+    x_test = resize_images(test_dataset)
 
     x_train = torch.tensor(x_train.reshape(-1, 14*14).astype('float32') / 255)
     y_train = torch.tensor([label for _, label in train_dataset], dtype=torch.long) 
