@@ -92,4 +92,22 @@ def train_model(train_loader):
     print("✅ Model trained successfully")
     return model
 
+def test_model(model, test_loader):
+    print("Test model...")
+    with torch.no_grad():
+        n_correct = 0
+        n_samples = 0
+
+        for images, labels in test_loader:
+            images = images.to(device).reshape(-1, 14*14)
+            labels = labels.to(device)
+            outputs = model(images)
+            _, predicted = torch.max(outputs.data, 1)
+
+            n_samples += labels.size(0)
+            n_correct += (predicted == labels).sum().item()
+
+        acc = 100.0 * n_correct / n_samples
+        print(f'Accuracy of the network on the 10000 test images: {acc} %')
+
 
