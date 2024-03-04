@@ -9,6 +9,9 @@ from giza_actions.action import action, Action
 from giza_actions.task import task
 from torch.utils.data import DataLoader, TensorDataset
 import torch.onnx
+from giza_actions.model import GizaModel
+import torch.nn.functional as F
+from PIL import Image
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -118,6 +121,16 @@ def convert_to_onnx(model, onnx_file_path):
     torch.onnx.export(model, dummy_input, onnx_file_path, export_params=True, opset_version=10, do_constant_folding=True)
 
     print(f"Model has been converted to ONNX and saved as {onnx_file_path}") 
+
+@task(name=f'Preprocess Image')
+def preprocess_image(image_path):
+    # Load image, convert to grayscale, resize and normalize
+    image = Image.open(image_path).convert('L')
+    # Resize to match the input size of the model
+    image = image.resize((14, 14))
+    image = np.array(image).astype('float32') / 255
+    image = image.reshape(1, 196)  # Reshape to (1, 196) for model input
+    return image
 
 @action(name=f'Execution', log_prints=True)
 def execution():
