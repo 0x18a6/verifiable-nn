@@ -65,3 +65,30 @@ def create_data_loaders(x_train, y_train, x_test, y_test ):
     print("✅ Loaders created!")
 
     return train_loader, test_loader
+
+def train_model(train_loader):
+    print("Train model...")
+
+    model = Net(input_size, hidden_size, num_classes).to(device)
+    criterion = nn.CrossEntropyLoss()
+    optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+
+    for epoch in range(num_epochs):
+        for i, (images, labels) in enumerate(train_loader):
+            images = images.to(device).reshape(-1, 14*14)
+            labels = labels.to(device)
+
+            outputs = model(images)
+            loss = criterion(outputs, labels)
+
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+
+            if (i + 1) % 100 == 0:
+                print(f'Epoch [{epoch + 1}/{num_epochs}], Step [{i + 1}/{len(train_loader)}], Loss: {loss.item():.4f}')
+
+    print("✅ Model trained successfully")
+    return model
+
+
