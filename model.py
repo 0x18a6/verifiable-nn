@@ -66,6 +66,7 @@ def create_data_loaders(x_train, y_train, x_test, y_test ):
 
     return train_loader, test_loader
 
+@task(name=f'Train model')
 def train_model(train_loader):
     print("Train model...")
 
