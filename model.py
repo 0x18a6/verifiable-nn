@@ -132,7 +132,8 @@ def preprocess_image(image_path):
     image = image.reshape(1, 196)  # Reshape to (1, 196) for model input
     return image
 
-def prediction(image):
+@task(name='Prediction with ONNX')
+def prediction_with_onnx(image):
     model = GizaModel(model_path="./mnist_model.onnx")
 
     result = model.predict(
@@ -148,6 +149,42 @@ def prediction(image):
 
     return predicted_class.item()
 
+@action(name=f'Execution: Prediction with ONNX', log_prints=True )
+def execution_with_onnx():
+    image = preprocess_image("./imgs/zero.png")
+    predicted_digit = prediction_with_onnx(image)
+    print(f"Predicted Digit: {predicted_digit}")
+
+    return predicted_digit
+
+MODEL_ID = 422
+VERSION_ID = 1
+
+@task(name=f'Prediction with Cairo')
+def prediction_with_cairo(image, model_id, version_id):
+    model = GizaModel(id=model_id, version=version_id)
+
+    (result, request_id) = model.predict(
+        input_feed={"image": image}, verifiable=True, output_dtype="Tensor<FP16x16>"
+    )
+
+    # Convert result to a PyTorch tensor
+    result_tensor = torch.tensor(result)
+    # Apply softmax to convert to probabilities
+    probabilities = F.softmax(result_tensor, dim=1)
+    # Use argmax to get the predicted class
+    predicted_class = torch.argmax(probabilities, dim=1)
+
+    return predicted_class.item(), request_id
+
+@action(name=f'Execution: Prediction with Cairo', log_prints=True)
+def execution_with_cairo():
+    image = preprocess_image("./imgs/zero.png")
+    (result, request_id) = prediction_with_cairo(image, MODEL_ID, VERSION_ID)
+    print("Result: ", result)
+    print("Request id: ", request_id)
+
+    return result, request_id
 
 @action(name=f'Execution', log_prints=True)
 def execution():
@@ -161,9 +198,8 @@ def execution():
     convert_to_onnx(model, onnx_file_path)
 
 if __name__=="__main__":
-    action_deploy = Action(entrypoint=execution, name="pytorch-mnist-action")
-    action_deploy.serve(name="pytorch-mnist-deployment")
+    action_deploy = Action(entrypoint=execution_with_cairo, name="verifiable-pytorch-mnist-action")
+    action_deploy.serve(name="verifiable-pytorch-mnist-deployment")
 
-execution()
-
-
+# execution()
+execution_with_cairo()
