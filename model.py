@@ -34,7 +34,7 @@ class Net(nn.Module):
         return out
 
 def resize_images(images):
-    return np.array([zoom(images[0], (0.5, 0.5)) for image in images])
+    return np.array([zoom(image[0], (0.5, 0.5)) for image in images])
 
 @task(name=f'Prepare Datasets')
 def prepare_datasets():
