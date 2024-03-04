@@ -5,7 +5,7 @@ import torchvision
 import numpy as np
 import logging
 from scipy.ndimage import zoom
-from giza_actions.action import action
+from giza_actions.action import action, Action
 from giza_actions.task import task
 from torch.utils.data import DataLoader, TensorDataset
 
@@ -118,5 +118,10 @@ def execution():
     model = train_model(train_loader)
     test_model(model, test_loader)
 
+if __name__=="__main__":
+    action_deploy = Action(entrypoint=execution, name="pytorch-mnist-action")
+    action_deploy.serve(name="pytorch-mnist-deployment")
+
 execution()
+
 
