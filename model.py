@@ -27,14 +27,14 @@ class Net(nn.Module):
     def __init__(self, input_size, hidden_size, num_classes):
         super(Net, self).__init__()
         self.input_size = input_size
-        self.l1 = nn.Linear(input_size, hidden_size)
+        self.layer1 = nn.Linear(input_size, hidden_size)
         self.relu = nn.ReLU()
-        self.l2 = nn.Linear(hidden_size, num_classes)
+        self.layer2 = nn.Linear(hidden_size, num_classes)
 
     def forward(self, x):
-        out = self.l1(x)
+        out = self.layer1(x)
         out = self.relu(out)
-        out = self.l2(out)
+        out = self.layer2(out)
         return out
 
 def resize_images(images):
@@ -132,31 +132,6 @@ def preprocess_image(image_path):
     image = image.reshape(1, 196)  # Reshape to (1, 196) for model input
     return image
 
-@task(name='Prediction with ONNX')
-def prediction_with_onnx(image):
-    model = GizaModel(model_path="./mnist_model.onnx")
-
-    result = model.predict(
-        input_feed={"onnx::Gemm_0": image}, verifiable=False
-    )
-
-    # Convert result to a PyTorch tensor
-    result_tensor = torch.tensor(result)
-    # Apply softmax to convert to probabilities
-    probabilities = F.softmax(result_tensor, dim=1)
-    # Use argmax to get the predicted class
-    predicted_class = torch.argmax(probabilities, dim=1)
-
-    return predicted_class.item()
-
-@action(name=f'Execution: Prediction with ONNX', log_prints=True )
-def execution_with_onnx():
-    image = preprocess_image("./imgs/zero.png")
-    predicted_digit = prediction_with_onnx(image)
-    print(f"Predicted Digit: {predicted_digit}")
-
-    return predicted_digit
-
 MODEL_ID = 422
 VERSION_ID = 1
 
@@ -178,15 +153,6 @@ def prediction_with_cairo(image, model_id, version_id):
     return predicted_class.item(), request_id
 
 @action(name=f'Execution: Prediction with Cairo', log_prints=True)
-def execution_with_cairo():
-    image = preprocess_image("./imgs/zero.png")
-    (result, request_id) = prediction_with_cairo(image, MODEL_ID, VERSION_ID)
-    print("Result: ", result)
-    print("Request id: ", request_id)
-
-    return result, request_id
-
-@action(name=f'Execution', log_prints=True)
 def execution():
     x_train, y_train, x_test, y_test = prepare_datasets()
     train_loader, test_loader = create_data_loaders(x_train, y_train, x_test, y_test)
@@ -197,9 +163,16 @@ def execution():
     onnx_file_path = "mnist_model.onnx"
     convert_to_onnx(model, onnx_file_path)
 
+    image = preprocess_image("./imgs/zero.png")
+    (result, request_id) = prediction_with_cairo(image, MODEL_ID, VERSION_ID)
+    print("Result: ", result)
+    print("Request id: ", request_id)
+
+    return result, request_id
+
 if __name__=="__main__":
-    action_deploy = Action(entrypoint=execution_with_cairo, name="verifiable-pytorch-mnist-action")
+    action_deploy = Action(entrypoint=execution, name="verifiable-pytorch-mnist-action")
     action_deploy.serve(name="verifiable-pytorch-mnist-deployment")
 
 # execution()
-execution_with_cairo()
+execution()
