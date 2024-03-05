@@ -174,5 +174,4 @@ if __name__=="__main__":
     action_deploy = Action(entrypoint=execution, name="verifiable-pytorch-mnist-action")
     action_deploy.serve(name="verifiable-pytorch-mnist-deployment")
 
-# execution()
 execution()
