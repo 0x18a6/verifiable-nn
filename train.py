@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.optim as optim
 import torchvision
 import numpy as np
-import logging
+# import logging
 from scipy.ndimage import zoom
 from giza_actions.action import action, Action
 from giza_actions.task import task
@@ -18,7 +18,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 input_size = 196 #14*14
 hidden_size = 10
 num_classes = 10
-num_epochs = 10
+num_epochs = 20
 batch_size = 256
 learning_rate = 0.001
 
@@ -132,9 +132,6 @@ def preprocess_image(image_path):
     image = image.reshape(1, 196)  # Reshape to (1, 196) for model input
     return image
 
-MODEL_ID = 422
-VERSION_ID = 1
-
 @task(name=f'Prediction with Cairo')
 def prediction_with_cairo(image, model_id, version_id):
     model = GizaModel(id=model_id, version=version_id)
@@ -152,26 +149,19 @@ def prediction_with_cairo(image, model_id, version_id):
 
     return predicted_class.item(), request_id
 
-@action(name=f'Execution: Prediction with Cairo', log_prints=True)
+@action(name=f'Execution', log_prints=True)
 def execution():
     x_train, y_train, x_test, y_test = prepare_datasets()
     train_loader, test_loader = create_data_loaders(x_train, y_train, x_test, y_test)
     model = train_model(train_loader)
     test_model(model, test_loader)
-
+    
     # Convert to ONNX
     onnx_file_path = "mnist_model.onnx"
     convert_to_onnx(model, onnx_file_path)
 
-    image = preprocess_image("./imgs/zero.png")
-    (result, request_id) = prediction_with_cairo(image, MODEL_ID, VERSION_ID)
-    print("Result: ", result)
-    print("Request id: ", request_id)
-
-    return result, request_id
-
 if __name__=="__main__":
-    action_deploy = Action(entrypoint=execution, name="verifiable-pytorch-mnist-action")
-    action_deploy.serve(name="verifiable-pytorch-mnist-deployment")
+    execution_action_deploy = Action(entrypoint=execution, name="verifiable-pytorch-mnist-execution")
+    execution_action_deploy.serve(name="verifiable-pytorch-mnist-execution")
 
-execution()
+    execution()

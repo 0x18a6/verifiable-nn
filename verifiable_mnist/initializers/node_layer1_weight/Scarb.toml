@@ -1,5 +1,5 @@
 [package]
-name = "node_l2_weight"
+name = "node_layer1_weight"
 version = "0.1.0"
 edition = "2023_10"
 

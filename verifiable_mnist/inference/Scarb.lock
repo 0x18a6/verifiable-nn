@@ -56,36 +56,36 @@ source = "git+https://github.com/influenceth/cubit.git?rev=6275608#62756082bf255
 name = "inference"
 version = "0.1.0"
 dependencies = [
- "node_l1_bias",
- "node_l1_weight",
- "node_l2_bias",
- "node_l2_weight",
+ "node_layer1_bias",
+ "node_layer1_weight",
+ "node_layer2_bias",
+ "node_layer2_weight",
  "orion",
 ]
 
 [[package]]
-name = "node_l1_bias"
+name = "node_layer1_bias"
 version = "0.1.0"
 dependencies = [
  "orion",
 ]
 
 [[package]]
-name = "node_l1_weight"
+name = "node_layer1_weight"
 version = "0.1.0"
 dependencies = [
  "orion",
 ]
 
 [[package]]
-name = "node_l2_bias"
+name = "node_layer2_bias"
 version = "0.1.0"
 dependencies = [
  "orion",
 ]
 
 [[package]]
-name = "node_l2_weight"
+name = "node_layer2_weight"
 version = "0.1.0"
 dependencies = [
  "orion",
